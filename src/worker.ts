@@ -109,6 +109,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     return true; // 保持消息通道开放，等待异步响应
   }
+
   // 处理清除所有上报记录的请求
   else if (message.type === 'CLEAR_REPORTS') {
     ReportHistory.clearAllReports()
@@ -121,6 +122,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     
     return true; // 保持消息通道开放，等待异步响应
   }
+  
   // 处理获取所有对端公钥的请求
   else if (message.type === 'GET_ALL_PEER_KEYS') {
     ReportHistory.getAllPeerKeys()
@@ -129,6 +131,26 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       })
       .catch(error => {
         sendResponse({ success: false, message: '获取所有对端公钥失败' });
+      });
+    
+    return true; // 保持消息通道开放，等待异步响应
+  }
+  // 处理清除所有数据的请求
+  else if (message.type === 'CLEAR_ALL_DATA') {
+    // 先清除配置数据
+    ConfigManager.clearAllConfig()
+      .then(() => {
+        // 再清除历史上报记录
+        return ReportHistory.clearAllReports();
+      })
+      .then(() => {
+        // 重置域名状态管理器
+        domainStateManager.reset();
+        sendResponse({ success: true });
+      })
+      .catch(error => {
+        console.error('清除所有数据失败:', error);
+        sendResponse({ success: false, message: '清除所有数据失败' });
       });
     
     return true; // 保持消息通道开放，等待异步响应

@@ -281,7 +281,7 @@ const ServiceConfig = () => {
                 复制私钥
               </Button>
               <Button size="small" type="primary" onClick={handleChangePrivateKey}>
-                更换私钥
+                {publicKey ? '更换密钥' : '新增密钥'}
               </Button>
             </Space>
           </div>
@@ -357,7 +357,7 @@ const ServiceConfig = () => {
 
       {/* 更换私钥对话框 */}
       <Modal
-        title="更换私钥"
+        title="更换密钥"
         visible={privateKeyModalVisible}
         onOk={handleConfirmKeyChange}
         onCancel={() => setPrivateKeyModalVisible(false)}

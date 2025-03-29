@@ -19,8 +19,8 @@ export interface BaseConfig {
 
 // 默认配置
 const DEFAULT_CONFIG: BaseConfig = {
-  serviceName: 'Alice',
-  enableAutoSync: true,
+  serviceName: '',
+  enableAutoSync: false,
   syncInterval: 30,
   endpoint: ''
 };

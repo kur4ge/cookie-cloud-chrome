@@ -8,13 +8,15 @@ import {
   IconLock,
   IconUserGroup,
   IconHistory,
-  IconTool
+  IconTool,
+  IconStorage
 } from '@arco-design/web-react/icon';
 
 // 导入子页面组件
 import ServiceConfig from './components/ServiceConfig';
 import PeerKeys from './components/PeerKeys';
 import ReportHistory from './components/ReportHistory';
+import DataManagement from './components/DataManagement';
 
 const { Sider, Content } = Layout;
 const MenuItem = Menu.Item;
@@ -32,6 +34,10 @@ const Options = () => {
         return <PeerKeys />;
       case '3':
         return <ReportHistory />;
+      case '4':
+        return null; // 权限管理查询（暂未实现）
+      case '5':
+        return <DataManagement />;
       default:
         return <ServiceConfig />;
     }
@@ -60,6 +66,9 @@ const Options = () => {
             </MenuItem>
             <MenuItem key="4">
               <IconTool /> 权限管理查询
+            </MenuItem>
+            <MenuItem key="5">
+              <IconStorage /> 数据管理
             </MenuItem>
           </Menu>
         </Sider>
