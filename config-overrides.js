@@ -11,7 +11,7 @@ module.exports = override(
       popup: path.join(__dirname, 'src/popup/popup.tsx'),
       options: path.join(__dirname, 'src/options/options.tsx'),
       // 添加 service worker 入口，并命名为 service-worker
-      'service-worker': path.join(__dirname, 'src/service/worker.ts')
+      'service-worker': path.join(__dirname, 'src/worker.ts')
     };
 
     // 修改输出配置，将 service-worker.js 输出到根目录
