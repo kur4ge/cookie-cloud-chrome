@@ -1,19 +1,19 @@
 /**
- * Endpoint API 交互工具
+ * CookieCloud API 交互工具
  */
 
 import ConfigManager from '../service/config';
 
 // 定义数据项接口
-export interface EndpointDataItem {
+export interface CookieCloudDataItem {
   data: any;
   [key: string]: any; // 允许其他字段
 }
 
 /**
- * Endpoint API 客户端类
+ * CookieCloud API 客户端类
  */
-export class EndpointApiClient {
+export class CookieCloudApiClient {
   /**
    * 获取配置的endpoint地址
    * @returns Promise<string | null> endpoint地址，如果未配置则返回null
@@ -29,7 +29,7 @@ export class EndpointApiClient {
    * @returns Promise<{success: boolean, message?: string}> 操作结果
    */
   async setData(
-    dataMap: Map<string, EndpointDataItem>
+    dataMap: Map<string, CookieCloudDataItem>
   ): Promise<{success: boolean, message?: string}> {
     try {
       // 获取配置的endpoint地址
@@ -46,7 +46,7 @@ export class EndpointApiClient {
       const apiUrl = `${endpoint}/set`;
       
       // 将Map转换为对象
-      const dataObject: Record<string, EndpointDataItem> = {};
+      const dataObject: Record<string, CookieCloudDataItem> = {};
       dataMap.forEach((value, key) => {
         dataObject[key] = value;
       });
@@ -57,7 +57,7 @@ export class EndpointApiClient {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(dataObject)
+        body: JSON.stringify({data: dataObject})
       });
       
       if (!response.ok) {
@@ -80,4 +80,4 @@ export class EndpointApiClient {
 }
 
 // 导出默认实例
-export default new EndpointApiClient();
+export default new CookieCloudApiClient();

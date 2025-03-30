@@ -5,7 +5,7 @@
 
 import domainStateManager, { DomainData } from './domainState';
 import encryptionHandler, { EncryptableDomainData } from '../utils/encryptionHandler';
-import endpointApi, { EndpointDataItem } from '../utils/endpointApi';
+import cookieCloudApiClient, { CookieCloudDataItem } from '../utils/cookieCloudApiClient';
 import ConfigManager from './config';
 import ReportManager, { SyncReport } from './reportHistory';
 
@@ -56,7 +56,7 @@ export async function syncDomainData(sinceLastExtract: boolean = true): Promise<
     }
     
     // 3. 准备API发送的数据格式
-    const apiDataMap = new Map<string, EndpointDataItem>();
+    const apiDataMap = new Map<string, CookieCloudDataItem>();
     
     // 获取当前时间戳，用于数据项的时间标记
     
@@ -69,7 +69,7 @@ export async function syncDomainData(sinceLastExtract: boolean = true): Promise<
     });
     
     // 4. 发送数据到endpoint
-    const result = await endpointApi.setData(apiDataMap);
+    const result = await cookieCloudApiClient.setData(apiDataMap);
     
     // 5. 如果发送成功，更新最后同步时间
     if (result.success) {

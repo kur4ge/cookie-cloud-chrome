@@ -157,9 +157,11 @@ export async function encryptDomainDataBatch(
             if (!encryptableData) {
                 continue;
             }
+            // 删除 encryptableData 中的 domain 属性
+            const { domain, ...restData } = encryptableData;
 
             // 将数据转为JSON字符串
-            const jsonData = JSON.stringify(encryptableData);
+            const jsonData = JSON.stringify(restData);
 
             // 使用多接收者加密
             const encryptedData = encryptAndSignForMultipleRecipients(

@@ -77,7 +77,8 @@ export function encryptAndSign(recipientPublicKey: string, senderPrivateKey: str
 
   // 使用共享密钥作为 AES 密钥来加密数据
   const encrypted = CryptoJS.AES.encrypt(data, sharedSecretKey, {
-    iv: sharedSecretKey,
+    // 取共享密钥的前16字节作为初始化向量
+    iv: CryptoJS.lib.WordArray.create(sharedSecretKey.words.slice(0, 4)),
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   });
@@ -143,7 +144,7 @@ export function verifyAndDecrypt(recipientPrivateKey: string, senderPublicKey: s
     data,
     sharedSecretKey,
     {
-      iv: sharedSecretKey,
+      iv: CryptoJS.lib.WordArray.create(sharedSecretKey.words.slice(0, 4)),
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     }
@@ -221,7 +222,7 @@ export function encryptAndSignForMultipleRecipients(
   
   // 使用AES密钥加密数据（只加密一次）
   const encrypted = CryptoJS.AES.encrypt(data, aesKey, {
-    iv: aesKey,
+    iv: CryptoJS.lib.WordArray.create(aesKey.words.slice(0, 4)) ,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.Pkcs7,
   }).toString();
@@ -244,7 +245,7 @@ export function encryptAndSignForMultipleRecipients(
       aesKey,
       sharedSecretKey,
       {
-        iv: sharedSecretKey,
+        iv: CryptoJS.lib.WordArray.create(sharedSecretKey.words.slice(0, 4)),
         mode: CryptoJS.mode.CBC,
         padding: CryptoJS.pad.NoPadding,
       }
@@ -330,7 +331,7 @@ export function verifyAndDecryptForMultipleRecipients(
     shareKeys[keyHash],
     sharedSecretKey,
     {
-      iv: sharedSecretKey,
+      iv: CryptoJS.lib.WordArray.create(sharedSecretKey.words.slice(0, 4)),
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.NoPadding
     }
@@ -341,7 +342,7 @@ export function verifyAndDecryptForMultipleRecipients(
     data,
     decryptedKey,
     {
-      iv: decryptedKey,
+      iv: CryptoJS.lib.WordArray.create(decryptedKey.words.slice(0, 4)),
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7
     }
