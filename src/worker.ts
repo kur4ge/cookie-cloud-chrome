@@ -1,7 +1,8 @@
 import domainStateManager from './service/domainState';
 import ConfigManager from './service/config';
 import syncService from './service/syncService';
-import ReportHistory from './service/reportHistory'; // 导入单例实例
+import ReportHistory from './service/reportHistory';
+import { handleMessage } from './actions'; // 导入消息处理函数
 
 // 监听扩展安装事件
 chrome.runtime.onInstalled.addListener(async (details) => {
@@ -33,132 +34,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
 
 // 监听来自扩展其他部分的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('收到消息:', message, '来自:', sender);
-  
-  // 验证消息来源是否为同一扩展
-  if (!sender.id || sender.id !== chrome.runtime.id) {
-    console.warn('拒绝来自其他扩展或页面的消息:', sender);
-    sendResponse({ success: false, message: '消息来源不合法' });
-    return true;
-  }
-  
-  // 检查消息类型
-  if (message.type === 'FORCE_SYNC') {
-      // 执行强制同步
-      syncService.syncDomainData(false) // 同步所有数据，不仅是上次提取后的
-        .then(result => {
-          sendResponse(result);
-        })
-        .catch(error => {
-          sendResponse({ success: false, message: '同步过程中发生错误' });
-        });
-      return true; // 保持消息通道开放，等待异步响应
-  } 
-  // 处理正常同步请求
-  else if (message.type === 'NORMAL_SYNC') {
-      // 执行正常同步，只同步上次提取后更新的数据
-      syncService.syncDomainData(true)
-        .then(result => {
-          sendResponse(result);
-        })
-        .catch(error => {
-          console.error('正常同步失败:', error);
-          sendResponse({ success: false, message: '同步过程中发生错误' });
-        });
-      return true; // 保持消息通道开放，等待异步响应
-  }
-  // 处理查询上报记录的请求
-  else if (message.type === 'QUERY_REPORTS') {
-    const { options } = message;
-    
-    // 直接使用导入的单例实例
-    ReportHistory.queryReports(options)
-      .then(reports => {
-        sendResponse({ success: true, data: reports });
-      })
-      .catch(error => {
-        sendResponse({ success: false, message: '查询上报记录失败' });
-      });
-    
-    return true; // 保持消息通道开放，等待异步响应
-  }
-  // 处理获取上报记录总数的请求
-  else if (message.type === 'GET_REPORT_COUNT') {
-    // 检查是否有筛选条件
-    const { options } = message;
-    
-    if (options) {
-      // 如果有筛选条件，使用筛选后的总数
-      ReportHistory.getFilteredReportCount(options)
-        .then(count => {
-          sendResponse({ success: true, count });
-        })
-        .catch(error => {
-          sendResponse({ success: false, message: '获取筛选记录总数失败' });
-        });
-    } else {
-      // 没有筛选条件，使用原来的方法获取总数
-      ReportHistory.getReportCount()
-        .then(count => {
-          sendResponse({ success: true, count });
-        })
-        .catch(error => {
-          sendResponse({ success: false, message: '获取上报记录总数失败' });
-        });
-    }
-    
-    return true; // 保持消息通道开放，等待异步响应
-  }
-
-  // 处理清除所有上报记录的请求
-  else if (message.type === 'CLEAR_REPORTS') {
-    ReportHistory.clearAllReports()
-      .then(() => {
-        sendResponse({ success: true });
-      })
-      .catch(error => {
-        sendResponse({ success: false, message: '清除所有上报记录失败' });
-      });
-    
-    return true; // 保持消息通道开放，等待异步响应
-  }
-  
-  // 处理获取所有对端公钥的请求
-  else if (message.type === 'GET_ALL_PEER_KEYS') {
-    ReportHistory.getAllPeerKeys()
-      .then(keys => {
-        sendResponse({ success: true, keys });
-      })
-      .catch(error => {
-        sendResponse({ success: false, message: '获取所有对端公钥失败' });
-      });
-    
-    return true; // 保持消息通道开放，等待异步响应
-  }
-  // 处理清除所有数据的请求
-  else if (message.type === 'CLEAR_ALL_DATA') {
-    // 先清除配置数据
-    ConfigManager.clearAllConfig()
-      .then(() => {
-        // 再清除历史上报记录
-        return ReportHistory.clearAllReports();
-      })
-      .then(() => {
-        // 重置域名状态管理器
-        domainStateManager.reset();
-        sendResponse({ success: true });
-      })
-      .catch(error => {
-        console.error('清除所有数据失败:', error);
-        sendResponse({ success: false, message: '清除所有数据失败' });
-      });
-    
-    return true; // 保持消息通道开放，等待异步响应
-  }
-  
-  // 默认响应
-  sendResponse({ error: '未知的消息类型' });
-  return true;
+  return handleMessage(message, sender, sendResponse);
 });
 
 // 监听 cookie 变化
@@ -177,6 +53,19 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
   { urls: ["<all_urls>"] },
   ["requestHeaders"]
 );
+
+// 监听标签页更新事件
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  console.log('tabId', tabId, changeInfo, tab);
+  if (changeInfo.status === 'loading' || changeInfo.url) {
+    domainStateManager.clearTabDomains(tabId);
+  }
+});
+
+// 监听标签页关闭事件
+chrome.tabs.onRemoved.addListener((tabId) => {
+  domainStateManager.clearTabDomains(tabId);
+});
 
 // 设置定期清理过期数据的任务
 setInterval(() => {
@@ -199,7 +88,6 @@ setInterval(async () => {
         // 执行同步，只同步变化的数据
         const result = await syncService.syncDomainData(true);
         console.log('自动同步完成:', result);
-        
       } 
     }
   } catch (error) {
