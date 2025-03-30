@@ -18,6 +18,8 @@ const ServiceConfig = () => {
   const [privateKeyModalVisible, setPrivateKeyModalVisible] = useState(false);
   const [keyChangeType, setKeyChangeType] = useState('generate');
   const [inputPrivateKey, setInputPrivateKey] = useState('');
+  const [cookieSyncEnabled, setCookieSyncEnabled] = useState(true);
+  const [headerSyncEnabled, setHeaderSyncEnabled] = useState(true);
 
   // 组件加载时获取配置
   useEffect(() => {
@@ -27,6 +29,8 @@ const ServiceConfig = () => {
         form.setFieldsValue(config);
 
         setAutoSyncEnabled(config.enableAutoSync);
+        setCookieSyncEnabled(config.enableCookieSync);
+        setHeaderSyncEnabled(config.enableHeaderSync);
 
         // 设置最后同步时间
         if (config.lastSyncTime) {
@@ -129,15 +133,61 @@ const ServiceConfig = () => {
     }
   };
 
+  // 处理Cookie同步开关变化
+  const handleCookieSyncChange = async (checked: boolean) => {
+    setCookieSyncEnabled(checked);
+    try {
+      setLoading(true);
+      // 获取当前配置并更新
+      const currentConfig = await ConfigManager.getBaseConfig();
+      await ConfigManager.saveBaseConfig({
+        ...currentConfig,
+        enableCookieSync: checked
+      });
+      Message.success('全局Cookie同步设置已更新');
+    } catch (error) {
+      Message.error('更新全局Cookie同步设置失败');
+      console.error('更新全局Cookie同步设置失败:', error);
+      // 恢复状态
+      setCookieSyncEnabled(!checked);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 处理Header同步开关变化
+  const handleHeaderSyncChange = async (checked: boolean) => {
+    setHeaderSyncEnabled(checked);
+    try {
+      setLoading(true);
+      // 获取当前配置并更新
+      const currentConfig = await ConfigManager.getBaseConfig();
+      await ConfigManager.saveBaseConfig({
+        ...currentConfig,
+        enableHeaderSync: checked
+      });
+      Message.success('全局Header同步设置已更新');
+    } catch (error) {
+      Message.error('更新全局Header同步设置失败');
+      console.error('更新全局Header同步设置失败:', error);
+      // 恢复状态
+      setHeaderSyncEnabled(!checked);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (values: BaseConfig) => {
     try {
       setLoading(true);
-      // 保留原来的 lastSyncTime
+      // 保留原来的 lastSyncTime 和同步设置
       const currentConfig = await ConfigManager.getBaseConfig();
       const newConfig = {
         ...values,
         privateKey: currentConfig.privateKey, // 保持原有 privateKey 的值，不进行更新
-        lastSyncTime: currentConfig.lastSyncTime
+        lastSyncTime: currentConfig.lastSyncTime,
+        enableCookieSync: cookieSyncEnabled, // 使用当前状态的值
+        enableHeaderSync: headerSyncEnabled  // 使用当前状态的值
       };
       await ConfigManager.saveBaseConfig(newConfig);
 
@@ -303,6 +353,31 @@ const ServiceConfig = () => {
           <InputNumber min={1} max={1440} defaultValue={5} style={{ maxWidth: '50%' }} />
         </FormItem>
 
+        {/* 全局同步控制 */}
+        <FormItem label="全局同步控制" style={{ maxWidth: '50%' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ flex: 1, paddingRight: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text>Cookie 同步</Text>
+                <Switch 
+                  checked={cookieSyncEnabled} 
+                  onChange={handleCookieSyncChange}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            <div style={{ flex: 1, paddingRight: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text>Header 同步</Text>
+                <Switch 
+                  checked={headerSyncEnabled} 
+                  onChange={handleHeaderSyncChange}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </div>
+        </FormItem>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', maxWidth: '50%' }}>
           <FormItem

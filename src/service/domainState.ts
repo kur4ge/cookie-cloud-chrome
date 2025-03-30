@@ -192,6 +192,34 @@ export class DomainStateManager {
     this.domainStates.clear();
     this.lastExtractTime = Date.now();
   }
+
+  /**
+   * 获取与特定Tab ID相关的所有域名
+   * @param tabId 标签页ID
+   * @returns 域名列表
+   */
+  public getDomainsForTab(tabId: number): string[] {
+    const relatedDomains: string[] = [];
+    this.domainStates.forEach((state, domain) => {
+      if (state.accessTabs.has(tabId)) {
+        relatedDomains.push(domain);
+      }
+    });
+    return relatedDomains;
+  }
+
+  /**
+   * 清理特定Tab ID相关的域名状态
+   * @param tabId 标签页ID
+   */
+  public clearTabDomains(tabId: number): void {
+    this.domainStates.forEach((state) => {
+      // 从每个域名的accessTabs集合中移除该tabId
+      if (state.accessTabs.has(tabId)) {
+        state.accessTabs.delete(tabId);
+      }
+    });
+  }
 }
 
 // 导出单例实例

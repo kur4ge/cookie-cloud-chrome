@@ -31,7 +31,6 @@ export async function syncDomainData(sinceLastExtract: boolean = true): Promise<
       domainDataList,
       async (encryptableData: EncryptableDomainData, peerPublicKeys: string[], dataIdentifier: string) => {
         // 收集同步报告
-        console.log('准备加密数据:', encryptableData);
         syncReports.push({
           timestamp: Date.now(),
           domain: encryptableData.domain,

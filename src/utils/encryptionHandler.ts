@@ -38,41 +38,50 @@ export async function prepareDomainDataForEncryption(
     domainData: DomainData
 ): Promise<EncryptableDomainData | null> {
     // 获取域名配置
-    const domainConfig = await ConfigManager.getDomainConfig(domainData.domain);
+    const domainConfig = await ConfigManager.getDomainSyncConfig(domainData.domain);
+
+    // 检查是否启用了Cookie和请求头同步
+    const enableCookieSync = domainConfig?.enableCookieSync !== false; // 默认为true
+    const enableHeaderSync = domainConfig?.enableHeaderSync !== false; // 默认为true
+
+    // 如果Cookie和请求头同步都被禁用，则直接返回null
+    if (!enableCookieSync && !enableHeaderSync) {
+        return null;
+    }
 
     // 提取需要的请求头
     const selectedHeaders: Record<string, string> = {};
 
-    // 默认包含的请求头列表
-    const headersToInclude = domainConfig?.remoteConfig?.headers || [];
-
     // 检查是否有需要上报的header
     let hasReportableHeaders = false;
 
-    // 检查更新的header是否在需要上报的列表中
-    if (domainData.updatedHeaderKeys && domainData.updatedHeaderKeys.length > 0) {
-        for (const updatedKey of domainData.updatedHeaderKeys) {
-            if (headersToInclude.includes(updatedKey)) {
-                hasReportableHeaders = true;
-                break;
+    if (enableHeaderSync && domainData.headers) {
+        // 获取包含和排除的请求头列表
+        const includedHeaders = domainConfig?.includedHeaders || [];
+
+        // 处理所有请求头
+        for (const [headerKey, headerValue] of Object.entries(domainData.headers)) {
+            const lowerHeaderKey = headerKey.toLowerCase();
+            
+            // 如果包含列表为空或者headerKey在包含列表中，则添加
+            if (includedHeaders.length === 0 || includedHeaders.some(h => h.toLowerCase() === lowerHeaderKey)) {
+                selectedHeaders[headerKey] = headerValue;
+                
+                // 如果是更新的请求头，标记为有可上报的请求头
+                if (domainData.updatedHeaderKeys && domainData.updatedHeaderKeys.includes(headerKey)) {
+                    hasReportableHeaders = true;
+                }
             }
         }
     }
 
-    // 如果cookie没有更新，并且没有需要上报的header，则直接返回null
-    if (!domainData.cookieUpdated && !hasReportableHeaders) {
+    // 如果cookie没有更新或禁用了Cookie同步，并且没有需要上报的header，则直接返回null
+    if ((!domainData.cookieUpdated || !enableCookieSync) && !hasReportableHeaders) {
         return null;
     }
 
-    // 从所有请求头中筛选需要的
-    for (const headerKey of headersToInclude) {
-        if (domainData.headers[headerKey]) {
-            selectedHeaders[headerKey] = domainData.headers[headerKey];
-        }
-    }
-
     let cookies: chrome.cookies.Cookie[] = []
-    if (domainData.cookieUpdated) {
+    if (enableCookieSync && domainData.cookieUpdated) {
         try {
             // 使用chrome API获取域名的所有cookie
             const allCookies = await chrome.cookies.getAll({ domain: domainData.domain });
@@ -149,6 +158,7 @@ export async function encryptDomainDataBatch(
 
             // 准备加密数据
             let encryptableData = await prepareDomainDataForEncryption(domainData);
+            console.log('encryptableData', encryptableData, encryptableData?.domain);
             // 如果提供了预处理回调，则应用预处理，并传递加密密钥
             if (encryptableData && preProcessCallback) {
                 encryptableData = await Promise.resolve(preProcessCallback(encryptableData, peerPublicKeys, encryptionKey));

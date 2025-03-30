@@ -1,10 +1,13 @@
 .popup-container {
-  width: 300px;
-  padding: 16px;
-  font-family: Arial, sans-serif;
+  min-width: 600px;
+  padding: 0;
+  overflow: hidden;
 }
 
-h1 {
-  font-size: 18px;
-  margin-bottom: 10px;
+.arco-typography {
+  margin: 0 !important;
+}
+
+.arco-table-td {
+  padding: 4px 8px !important;
 }

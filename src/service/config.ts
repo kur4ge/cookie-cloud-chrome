@@ -9,12 +9,16 @@ import { getKeyPairFromPrivateKey } from '../utils/crypto';
 
 // 基础配置接口
 export interface BaseConfig {
-  serviceName: string;        // 服务昵称
-  lastSyncTime?: number;      // 最后同步时间
-  enableAutoSync: boolean;    // 是否启用自动同步
-  syncInterval: number;       // 同步间隔（分钟）
-  privateKey?: string;        // 私钥
-  endpoint?: string;          // 上报数据的接口地址
+  serviceName: string;          // 服务昵称
+  lastSyncTime?: number;        // 最后同步时间
+  enableAutoSync: boolean;      // 是否启用自动同步
+  syncInterval: number;         // 同步间隔（分钟）
+  privateKey?: string;          // 私钥
+  endpoint?: string;            // 上报数据的接口地址
+  enableCookieSync: boolean;    // 是否启用Cookie同步
+  enableHeaderSync: boolean;    // 是否启用请求头同步
+  includedHeaders?: string[];   // 需要同步的请求头列表
+  excludedHeaders?: string[];   // 排除同步的请求头列表
 }
 
 // 默认配置
@@ -22,7 +26,11 @@ const DEFAULT_CONFIG: BaseConfig = {
   serviceName: '',
   enableAutoSync: false,
   syncInterval: 30,
-  endpoint: ''
+  endpoint: '',
+  enableCookieSync: true,
+  enableHeaderSync: true,
+  includedHeaders: [],
+  excludedHeaders: ['user-agent', 'referer'],
 };
 
 // 存储键名定义
@@ -45,21 +53,27 @@ export interface PeerKeyInfo {
   disabled: boolean;        // 是否禁用
 }
 
-// 远程配置接口
-export interface RemoteConfig {
-  headers?: string[];     // 需要同步的请求头列表
-}
+
 
 // 域名配置接口
 export interface DomainConfig {
   domain: string;               // 域名
   updateTime?: number;          // 最后获取时间
   notes?: string;               // 备注
-  remoteConfig?: RemoteConfig;  // 远程配置
   additionalPeers?: string[];   // 额外的对端公钥列表（针对此域名特别启用）
   disabledPeers?: string[];     // 禁用的对端公钥列表（针对此域名特别禁用）
+  enableCookieSync?: boolean;   // 是否启用Cookie同步（undefined表示继承基础配置）
+  enableHeaderSync?: boolean;   // 是否启用请求头同步（undefined表示继承基础配置）
+  includedHeaders?: string[];   // 需要同步的请求头列表
+  excludedHeaders?: string[];   // 排除同步的请求头列表
 }
 
+// 域名状态配置接口（只包含与同步相关的配置）
+export interface DomainSyncConfig {
+  enableCookieSync: boolean;    // 是否启用Cookie同步
+  enableHeaderSync: boolean;    // 是否启用请求头同步
+  includedHeaders: string[];    // 需要同步的请求头列表
+}
 /**
  * 配置管理类
  */
@@ -319,6 +333,44 @@ export class ConfigManager {
   }
 
   /**
+ * 获取域名同步配置
+ * @param domain 域名
+ * @returns Promise<DomainSyncConfig> 域名同步配置
+ */
+  static async getDomainSyncConfig(domain: string): Promise<DomainSyncConfig> {
+    // 获取基础配置
+    const baseConfig = await this.getBaseConfig();
+    
+    // 获取域名配置
+    const domainConfig = await this.getDomainConfig(domain);
+        
+    // 合并基础配置和域名配置
+    const syncConfig: DomainSyncConfig = {
+      // 如果域名配置存在且值不是undefined，使用域名配置的值，否则使用基础配置的值
+      enableCookieSync: domainConfig?.enableCookieSync !== undefined 
+        ? domainConfig.enableCookieSync 
+        : baseConfig.enableCookieSync,
+      enableHeaderSync: domainConfig?.enableHeaderSync !== undefined 
+        ? domainConfig.enableHeaderSync 
+        : baseConfig.enableHeaderSync,
+      
+      // 计算includedHeaders: (baseConfig.includedHeaders - domainConfig.excludedHeaders - baseConfig.excludedHeaders) + domainConfig.includedHeaders
+      includedHeaders: [
+        // 从baseConfig.includedHeaders中过滤掉在domainConfig.excludedHeaders和baseConfig.excludedHeaders中的项
+        ...(baseConfig.includedHeaders || []).filter(header => 
+          !(domainConfig?.excludedHeaders || []).includes(header) && 
+          !(baseConfig.excludedHeaders || []).includes(header)
+        ),
+        // 添加domainConfig.includedHeaders
+        ...(domainConfig?.includedHeaders || [])
+      ].filter((value, index, self) => self.indexOf(value) === index), // 去重
+    };
+    
+    return syncConfig;
+  }
+  
+
+  /**
    * 获取指定域名可用的对端公钥列表
    * @param domain 域名
    * @returns Promise<PeerKeyInfo[]> 可用的对端公钥列表
@@ -382,6 +434,14 @@ export class ConfigManager {
     const domainConfigs = await this.getAllDomainConfigs();
     const configIndex = domainConfigs.findIndex(config => config.domain === domain);
 
+    // 默认域名配置
+    const defaultDomainConfig: Omit<DomainConfig, 'domain'> = {
+      enableCookieSync: true,
+      enableHeaderSync: true,
+      includedHeaders: [],
+      excludedHeaders: [],
+    };
+
     if (configIndex >= 0) {
       // 更新现有配置
       const updatedConfig = {
@@ -396,6 +456,7 @@ export class ConfigManager {
       // 创建新配置
       const newConfig: DomainConfig = {
         domain,
+        ...defaultDomainConfig,
         ...configData
       };
 

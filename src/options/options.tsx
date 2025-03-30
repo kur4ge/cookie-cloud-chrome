@@ -17,6 +17,7 @@ import ServiceConfig from './components/ServiceConfig';
 import PeerKeys from './components/PeerKeys';
 import ReportHistory from './components/ReportHistory';
 import DataManagement from './components/DataManagement';
+import ReportRules from './components/ReportRules';
 
 const { Sider, Content } = Layout;
 const MenuItem = Menu.Item;
@@ -35,7 +36,7 @@ const Options = () => {
       case '3':
         return <ReportHistory />;
       case '4':
-        return null; // 权限管理查询（暂未实现）
+        return <ReportRules />;
       case '5':
         return <DataManagement />;
       default:
@@ -65,7 +66,7 @@ const Options = () => {
               <IconHistory /> 上报历史
             </MenuItem>
             <MenuItem key="4">
-              <IconTool /> 权限管理查询
+              <IconTool /> 上报规则
             </MenuItem>
             <MenuItem key="5">
               <IconStorage /> 数据管理
