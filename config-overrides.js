@@ -34,6 +34,11 @@ module.exports = override(
       (plugin) => plugin.constructor.name !== "WebpackManifestPlugin"
     );
 
+    // 检查是否为 release build，如果是则禁止生成 source map
+    if (process.env.REACT_APP_RELEASE_BUILD === 'true') {
+      console.log('Release build: 禁止生成 source map 文件');
+      config.devtool = false;
+    }
     return config;
   },
   
