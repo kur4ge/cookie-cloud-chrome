@@ -1,0 +1,49 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '23'
+          cache: 'npm'
+      
+      - name: install dependencie
+        run: npm ci
+      
+      - name: build extension
+        env:
+          REACT_APP_RELEASE_BUILD: ${{ vars.REACT_APP_RELEASE_BUILD }}
+        run: npm run build
+      
+      - name: 打包 Chrome 插件
+        run: |
+          cd build
+          zip -r ../cookie-cloud-chrome-extension-${{ github.ref_name }}.zip *
+          cd ..
+
+      - name: Get the version
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: 创建 Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.get_version.outputs.VERSION }}
+          files: cookie-cloud-chrome-extension-${{ github.ref_name }}.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
