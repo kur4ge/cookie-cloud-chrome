@@ -91,6 +91,7 @@ const ReportHistory = () => {
     loadPeerKeyInfos();
     loadAllHistoryPeerKeys();
     loadReports();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 表格列定义

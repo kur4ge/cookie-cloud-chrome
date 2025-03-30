@@ -68,6 +68,7 @@ const Popup = () => {
         setError('无法获取当前标签页信息');
       }
     });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
