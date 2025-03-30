@@ -56,7 +56,6 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 
 // 监听标签页更新事件
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  console.log('tabId', tabId, changeInfo, tab);
   if (changeInfo.status === 'loading' || changeInfo.url) {
     domainStateManager.clearTabDomains(tabId);
   }
@@ -87,7 +86,6 @@ setInterval(async () => {
       if (now - lastSyncTime >= syncIntervalMs) {
         // 执行同步，只同步变化的数据
         const result = await syncService.syncDomainData(true);
-        console.log('自动同步完成:', result);
       } 
     }
   } catch (error) {

@@ -15,7 +15,6 @@ export function handleMessage(
   sender: chrome.runtime.MessageSender, 
   sendResponse: (response?: any) => void
 ): boolean {
-  console.log('收到消息:', message, '来自:', sender);
   
   // 验证消息来源是否为同一扩展
   if (!sender.id || sender.id !== chrome.runtime.id) {

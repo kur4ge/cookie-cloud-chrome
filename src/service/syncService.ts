@@ -76,7 +76,6 @@ export async function syncDomainData(sinceLastExtract: boolean = true): Promise<
       await ConfigManager.updateBaseConfig({
         lastSyncTime: timestamp
       });
-      console.log('同步成功，更新最后同步时间', timestamp);
       // 6. 保存所有同步报告
       for (const report of syncReports) {
         await ReportManager.addReport(report);

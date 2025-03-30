@@ -158,7 +158,6 @@ export async function encryptDomainDataBatch(
 
             // 准备加密数据
             let encryptableData = await prepareDomainDataForEncryption(domainData);
-            console.log('encryptableData', encryptableData, encryptableData?.domain);
             // 如果提供了预处理回调，则应用预处理，并传递加密密钥
             if (encryptableData && preProcessCallback) {
                 encryptableData = await Promise.resolve(preProcessCallback(encryptableData, peerPublicKeys, encryptionKey));

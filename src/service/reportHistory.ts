@@ -114,7 +114,6 @@ class ReportHistory {
       const transaction = db.transaction([REPORTS_STORE], 'readwrite');
       const store = transaction.objectStore(REPORTS_STORE);
       
-      console.log('开始添加上报记录:', report);
       const request = store.add(report);
       
       request.onsuccess = (event) => {

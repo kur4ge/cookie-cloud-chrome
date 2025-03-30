@@ -56,7 +56,6 @@ const Popup = () => {
           (response) => {
             setLoading(false);
             if (response && response.success) {
-              console.log('获取到的域名和Cookie:', response.data);
               setTabData(response.data);
               
               // 如果还没有选择域名，则默认选择第一个

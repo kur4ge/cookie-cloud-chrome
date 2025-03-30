@@ -69,7 +69,6 @@ export function handleTabActions(
           const filteredCookies = cookies.filter(cookie => {
             return cookie.domain === domain
           });
-          console.log('filteredCookies', filteredCookies, domainData?.headers);
           sendResponse({
             success: true,
             data: {
