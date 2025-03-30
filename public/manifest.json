@@ -6,7 +6,10 @@
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
+      "64": "icons/logo64.png",
+      "128": "icons/logo128.png",
       "192": "icons/logo192.png",
+      "256": "icons/logo256.png",
       "512": "icons/logo512.png"
     }
   },
