@@ -1,7 +1,6 @@
 import domainStateManager from './service/domainState';
 import ConfigManager from './service/config';
 import syncService from './service/syncService';
-import ReportHistory from './service/reportHistory';
 import { handleMessage } from './actions'; // 导入消息处理函数
 
 // 监听扩展安装事件
@@ -85,7 +84,7 @@ setInterval(async () => {
       // 判断是否达到同步间隔
       if (now - lastSyncTime >= syncIntervalMs) {
         // 执行同步，只同步变化的数据
-        const result = await syncService.syncDomainData(true);
+        await syncService.syncDomainData(true);
       } 
     }
   } catch (error) {

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button, Space, Modal, Message, Divider, Typography } from '@arco-design/web-react';
 import { IconDelete } from '@arco-design/web-react/icon';
-import ConfigManager from '../../service/config';
 
 const { Title, Paragraph } = Typography;
 

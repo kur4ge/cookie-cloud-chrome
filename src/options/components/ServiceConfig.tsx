@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Input, Button, Form, Message, Switch, InputNumber, Typography, Space, Modal, Radio } from '@arco-design/web-react';
-import ConfigManager, { BaseConfig, StorageKeys } from '../../service/config';
+import ConfigManager, { BaseConfig } from '../../service/config';
 import { generateKeyPair, getKeyPairFromPrivateKey } from '../../utils/crypto';
 
 const FormItem = Form.Item;

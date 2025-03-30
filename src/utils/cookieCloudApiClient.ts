@@ -80,4 +80,5 @@ export class CookieCloudApiClient {
 }
 
 // 导出默认实例
-export default new CookieCloudApiClient();
+const cookieCloudApiClient = new CookieCloudApiClient();
+export default cookieCloudApiClient;

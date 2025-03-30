@@ -3,7 +3,7 @@
  * 整合域名状态管理、加密处理和API发送功能
  */
 
-import domainStateManager, { DomainData } from './domainState';
+import domainStateManager from './domainState';
 import encryptionHandler, { EncryptableDomainData } from '../utils/encryptionHandler';
 import cookieCloudApiClient, { CookieCloudDataItem } from '../utils/cookieCloudApiClient';
 import ConfigManager from './config';
@@ -134,7 +134,9 @@ export async function shouldSync(): Promise<boolean> {
   return Date.now() >= nextSyncTime;
 }
 
-export default {
+const syncService = {
   syncDomainData,
   shouldSync
 };
+
+export default syncService;

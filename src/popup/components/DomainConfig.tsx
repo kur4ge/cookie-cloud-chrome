@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Card, 
   Tabs, 
   Table, 
-  Switch, 
   Typography, 
   Space, 
-  Tag, 
   Empty,
   Radio
 } from '@arco-design/web-react';
 import '@arco-design/web-react/dist/css/arco.css';
-import { IconSettings, IconSync, IconClockCircle, IconClose } from '@arco-design/web-react/icon';
-import ConfigManager, { PeerKeyInfo, DomainSyncConfig, DomainConfig } from '../../service/config';
+import { IconSync, IconClockCircle } from '@arco-design/web-react/icon';
+import ConfigManager, { PeerKeyInfo, DomainConfig } from '../../service/config';
 
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 const TabPane = Tabs.TabPane;
 const RadioGroup = Radio.Group;
 
@@ -166,8 +163,6 @@ const DomainConfigUI: React.FC<DomainConfigProps> = ({ domain }) => {
   const handleCookieSyncChange = async (value: ConfigType) => {
     setSendCookies(value);
     try {
-      // 获取当前域名配置
-      const domainConfig = await ConfigManager.getDomainConfig(domain) || { domain };
       
       // 准备更新的配置对象
       const updateConfig: Partial<Omit<DomainConfig, 'domain'>> = {
@@ -195,8 +190,6 @@ const DomainConfigUI: React.FC<DomainConfigProps> = ({ domain }) => {
   const handleHeaderSyncChange = async (value: ConfigType) => {
     setSendHeaders(value);
     try {
-      // 获取当前域名配置
-      const domainConfig = await ConfigManager.getDomainConfig(domain) || { domain };
       
       // 准备更新的配置对象
       const updateConfig: Partial<Omit<DomainConfig, 'domain'>> = {

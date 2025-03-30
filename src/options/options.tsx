@@ -6,7 +6,6 @@ import { Layout, Menu, Typography, ConfigProvider } from '@arco-design/web-react
 import {
   IconSettings,
   IconLock,
-  IconUserGroup,
   IconHistory,
   IconTool,
   IconStorage

@@ -189,10 +189,11 @@ export async function encryptDomainDataBatch(
     return encryptedDataMap;
 }
 
-
-export default {
+const encryptionHandler = {
     prepareDomainDataForEncryption,
     getEnabledPeerPublicKeys,
     encryptDomainDataBatch,
     calculateKeyIdentifier,
 };
+
+export default encryptionHandler;

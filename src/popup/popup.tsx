@@ -4,19 +4,15 @@ import {
   Card, 
   Spin, 
   Typography, 
-  Table, 
-  List, 
-  Divider, 
   Result, 
   Space,
-  Button,
   Select
 } from '@arco-design/web-react';
 import { IconSettings } from '@arco-design/web-react/icon';
 import DomainConfig from './components/DomainConfig';
 import './popup.css';
 
-const { Title, Paragraph, Text } = Typography;
+const { Text } = Typography;
 const Option = Select.Option;
 
 interface TabData {

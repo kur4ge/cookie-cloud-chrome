@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Input, Button, Table, Space, Modal, Form, Message, Switch, Tag, Spin, Empty, Radio, AutoComplete, Tabs } from '@arco-design/web-react';
-import { IconSearch, IconPlus, IconDelete } from '@arco-design/web-react/icon';
+import { IconSearch, IconPlus } from '@arco-design/web-react/icon';
 import ConfigManager, { DomainConfig, PeerKeyInfo } from '../../service/config';
 
 const FormItem = Form.Item;
