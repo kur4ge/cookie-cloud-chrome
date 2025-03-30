@@ -11,11 +11,6 @@ Cookie Cloud 是一个安全的 Cookie 和请求头同步工具，使用 SECP256
 
 
 ## 安装方法
-### 从 Chrome 应用商店安装
-1. 访问 [Chrome 应用商店](https://chrome.google.com/webstore/category/extensions)
-2. 搜索 "Cookie Cloud"
-3. 点击 "添加至 Chrome"
-
 
 ### 手动安装
 1. 下载最新版本的 `.zip` 文件
