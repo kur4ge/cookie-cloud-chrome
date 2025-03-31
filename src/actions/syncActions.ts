@@ -19,6 +19,7 @@ export function handleSyncActions(
         sendResponse(result);
       })
       .catch(error => {
+        console.error('强制同步失败:', error);
         sendResponse({ success: false, message: '同步过程中发生错误' });
       });
     return true; // 保持消息通道开放，等待异步响应

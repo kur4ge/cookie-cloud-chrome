@@ -6,7 +6,6 @@ import { handleMessage } from './actions'; // 导入消息处理函数
 // 监听扩展安装事件
 chrome.runtime.onInstalled.addListener(async (details) => {
   console.log('Cookie Cloud 扩展已安装', details);
-
   // 初始化操作
   if (details.reason === 'install') {
     // 首次安装时的初始化
@@ -17,7 +16,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
         // 如果没有私钥，可以在这里生成
         console.log('初始化配置...');
       }
-      
       // 重置域名状态管理器
       domainStateManager.reset();
       
@@ -93,4 +91,12 @@ setInterval(async () => {
 }, 10 * 1000); // 每分钟检查一次
 
 console.log('Cookie Cloud Service Worker 已启动');
+syncService.syncDomainData(false) // 同步所有数据，不仅是上次提取后的
+.then(_ => {
+  console.info('初始化同步成功');
+})
+.catch(error => {
+  console.error('初始化同步失败:', error);
+});
+
 export { };

@@ -17,8 +17,8 @@ import ReportManager, { SyncReport } from './reportHistory';
 export async function syncDomainData(sinceLastExtract: boolean = true): Promise<{success: boolean, message?: string}> {
   try {
     // 1. 获取域名状态数据
-    const domainDataList = domainStateManager.extractDomainData(sinceLastExtract);
-    
+    const domainDataList = await domainStateManager.extractDomainData(sinceLastExtract);
+
     if (domainDataList.length === 0) {
       return { success: true, message: '没有需要同步的数据' };
     }

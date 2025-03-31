@@ -125,9 +125,9 @@ export class DomainStateManager {
   /**
    * 提取域名数据
    * @param sinceLastExtract 是否只提取上次提取后更新的数据
-   * @returns 域名数据列表
+   * @returns Promise<域名数据列表>
    */
-  public extractDomainData(sinceLastExtract: boolean = true): DomainData[] {
+  public async extractDomainData(sinceLastExtract: boolean = true): Promise<DomainData[]> {
     const result: DomainData[] = [];
     const now = Date.now();
     
@@ -149,13 +149,28 @@ export class DomainStateManager {
         }
       });
     } else {
+      // 使用Promise包装chrome.cookies.getAll
+      const domains = new Set<string>();
+      const cookies = await new Promise<chrome.cookies.Cookie[]>((resolve) => {
+        chrome.cookies.getAll({}, (cookies) => {
+          resolve(cookies);
+        });
+      });
+      
+      cookies.forEach(cookie => {
+        if (cookie.domain) {
+          domains.add(cookie.domain);
+        }
+      });
+
       // 强制提取所有数据
       this.domainStates.forEach((state, domain) => {
+        domains.delete(domain);
         result.push({
           domain: state.domain,
           cookieUpdated: true, // 强制提取时标记为需要更新
           headers: Object.fromEntries(state.headers),
-          updatedHeaderKeys: Array.from(state.headers.keys()), // 强制提取时所有header都视为已更新
+          updatedHeaderKeys: Array.from(state.headers.keys()),
           accessTabs: Array.from(state.accessTabs),
           lastUpdate: state.lastUpdate
         });
@@ -163,8 +178,18 @@ export class DomainStateManager {
         state.cookieUpdated = false;
         state.updatedHeaderKeys.clear();
       });
+
+      domains.forEach(domain => {
+        result.push({
+          domain: domain,
+          cookieUpdated: true, // 强制提取时标记为需要更新
+          headers: {},
+          updatedHeaderKeys: [],
+          accessTabs: [],
+          lastUpdate: now
+        });
+      });
     }
-    
     // 更新最后提取时间
     this.lastExtractTime = now;
     return result;

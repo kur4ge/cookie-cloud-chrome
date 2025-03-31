@@ -42,8 +42,8 @@ export function handleMessage(
   // Tab相关操作
   if (messageType === 'GET_TAB_DOMAINS' ||
       messageType === 'GET_DOMAIN_DATA') {
-    
-    return handleTabActions(message, sender, sendResponse);
+    handleTabActions(message, sender, sendResponse);
+    return true;
   }
   
   // 数据管理操作

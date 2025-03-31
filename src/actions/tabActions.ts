@@ -7,11 +7,11 @@ import domainStateManager from '../service/domainState';
  * @param sendResponse 响应回调
  * @returns 是否保持消息通道开放
  */
-export function handleTabActions(
+export async function handleTabActions(
   message: any, 
   sender: chrome.runtime.MessageSender, 
   sendResponse: (response?: any) => void
-): boolean {
+): Promise<boolean> {
   if (message.type === 'GET_TAB_DOMAINS') {
     const tabId = sender?.tab?.id ?? message.tabId; // 优先使用sender中的tabId
     if (!tabId) {
@@ -60,7 +60,7 @@ export function handleTabActions(
 
     try {
       // 从domainStateManager中获取该域名的状态数据
-      const domainData = domainStateManager.extractDomainData(false)
+      const domainData = (await domainStateManager.extractDomainData(false))
         .find(data => data.domain === domain);
       
       // 获取该域名的所有Cookie
